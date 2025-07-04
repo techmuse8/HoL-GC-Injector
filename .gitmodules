@@ -1,0 +1,3 @@
+[submodule "NeoGF-gcmtool"]
+	path = NeoGF-gcmtool
+	url = https://github.com/techmuse8/NeoGF-gcmtool
