@@ -1,11 +1,13 @@
 import os
 import shutil
+import sys
 from configparser import ConfigParser
 from pathlib import Path
 from argparse import ArgumentParser
 import tkinter as tk
 from tkinter import filedialog
 
+sys.path.append('NeoGF-gcmtool')
 from gcmtool import Gcm
 from gcmtool import rebuild_fst
 from gcmtool import pack
