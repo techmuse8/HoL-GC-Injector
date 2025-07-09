@@ -18,7 +18,8 @@ HoLROMPath = ''
 regionCode = ''
 config = ConfigParser()
 config.optionxform = str
-
+PALLanguages = ["ENGLISH", "FRENCH", "GERMAN", "ITALIAN", "SPANISH"]
+regionLetters = [word.lower()[0] for word in PALLanguages if word]
 
 def patchHoLROM(HoLRom): # Patch the HoL ROM to be compatiable with the emulator
     with open (HoLRom, mode='r+b') as file:
@@ -56,6 +57,12 @@ def patchSaveName(): # Patches the emulator's DOL file with custom save file met
 def getRegionCode():
     return (config['bi2.bin']['CountryCode'])
 
+def copyPALExclusiveAssets():
+    for language, languageInitial in zip(PALLanguages, regionLetters):
+        shutil.copy('assets/z_bnr.tpl', "tmp/root/TPL/" + language + "/z_bnr.tpl") # Save banner
+        shutil.copy('assets/z_icon.tpl', "tmp/root/TPL/" + language + "/z_bnr.tpl") # Save icon
+        shutil.copy('assets/zelda2e.tpl', f"tmp/root/zelda2{languageInitial}.tpl")
+
 def patchGCM(gcm_path, HoLROM, outputGCM):
     out_path = Path('tmp')
     gcm_path = Path(gcm_path)
@@ -85,6 +92,7 @@ def patchGCM(gcm_path, HoLROM, outputGCM):
     if regionCode == '2': # PAL
         shutil.copy(HoLROM + '_new', "tmp/root/zelda2p.n64") 
         shutil.copy('assets/zelda2e.tpl', "tmp/root/zelda2e.tpl")
+        copyPALExclusiveAssets()
     elif regionCode == '1': # NTSC-U
         shutil.copy(HoLROM + '_new', "tmp/root/zelda2e.n64") 
         shutil.copy('assets/zelda2e.tpl', "tmp/root/zelda2e.tpl")
@@ -105,8 +113,6 @@ def patchGCM(gcm_path, HoLROM, outputGCM):
     gcm.rebuild_fst(out_path, 4, 0)
     
     gcm.pack(out_path, injectedGCMPath)
-    os.remove('tmp')
-    os.remove(HoLROM + '_new')
 
 def main():
     print('This is main')
@@ -129,9 +135,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
