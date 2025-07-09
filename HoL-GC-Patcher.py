@@ -3,7 +3,7 @@ import shutil
 import sys
 from configparser import ConfigParser
 from pathlib import Path
-from argparse import ArgumentParser
+import argparse
 import tkinter as tk
 from tkinter import filedialog
 
@@ -60,7 +60,7 @@ def getRegionCode():
 def copyPALExclusiveAssets():
     for language, languageInitial in zip(PALLanguages, regionLetters):
         shutil.copy('assets/z_bnr.tpl', "tmp/root/TPL/" + language + "/z_bnr.tpl") # Save banner
-        shutil.copy('assets/z_icon.tpl', "tmp/root/TPL/" + language + "/z_bnr.tpl") # Save icon
+        shutil.copy('assets/z_icon.tpl', "tmp/root/TPL/" + language + "/z_icon.tpl") # Save icon
         shutil.copy('assets/zelda2e.tpl', f"tmp/root/zelda2{languageInitial}.tpl")
 
 def patchGCM(gcm_path, HoLROM, outputGCM):
@@ -115,22 +115,35 @@ def patchGCM(gcm_path, HoLROM, outputGCM):
     gcm.pack(out_path, injectedGCMPath)
 
 def main():
-    print('This is main')
-    HoLROMPath = filedialog.askopenfilename(filetypes=[('Hero of Law ROM', '*.z64')], 
-    title='Select a Hero of Law ROM file')
-    majoraGCMPath = filedialog.askopenfilename(filetypes=[("Zelda CE Majora's Mask image", "*.gcm *.iso")],
-    title="Select a Zelda: Collector's Edition (Majora's Mask) gcm/iso file")
-    finalGCMFileTypes = [('GameCube Disc Image', '*.gcm'), ('GameCube Disc Image', '*.iso')]
-    finalGCMFile = filedialog.asksaveasfilename(filetypes = finalGCMFileTypes, defaultextension = finalGCMFileTypes)
+
+    parser = argparse.ArgumentParser(description="Injects a Hero of Law ROM into the N64 emulator found in GameCube releases of Majora's Mask.")
+
+    parser.add_argument('HoLROM', nargs='?', type=str, help="The path to a Hero of Law ROM file.", default=None)
+    parser.add_argument('MajoraCEImage', nargs='?', type=str, help="The path to a Zelda: Collector's Edition (Majora's Mask) gcm/iso file.", default=None)
+    parser.add_argument('outputGCInject', nargs='?', type=str, help="The output filename of the injected Hero of Law GameCube image.", default=None)
+
+    args = parser.parse_args()   
+           
+    if all([args.HoLROM, args.MajoraCEImage, args.outputGCInject]):
+        HoLROMPath = args.HoLROM
+        majoraGCMPath = args.MajoraCEImage
+        finalGCMFile = args.outputGCInject
+        
+    else:
+        HoLROMPath = filedialog.askopenfilename(filetypes=[('Hero of Law ROM', '*.z64')], 
+        title='Select a Hero of Law ROM file')
+        majoraGCMPath = filedialog.askopenfilename(filetypes=[("Zelda CE Majora's Mask image", "*.gcm *.iso")],
+        title="Select a Zelda: Collector's Edition (Majora's Mask) gcm/iso file")
+        finalGCMFileTypes = [('GameCube Disc Image', '*.gcm'), ('GameCube Disc Image', '*.iso')]
+        finalGCMFile = filedialog.asksaveasfilename(filetypes = finalGCMFileTypes, defaultextension = finalGCMFileTypes)
     
     if os.path.isfile(finalGCMFile): # Done to satsify gcmtool as it doesn't like already existing files
         os.remove(finalGCMFile)
         
-    print(finalGCMFile)
     patchHoLROM(HoLROMPath)
-    print('HoL ROM patched!')
+    print('Hero of Law ROM patched!')
     patchGCM(majoraGCMPath, HoLROMPath, finalGCMFile)
-    print('Injected HoL into gcm/iso!')
+    print('Injected Hero of Law into gcm/iso!')
         
         
 if __name__ == "__main__":
